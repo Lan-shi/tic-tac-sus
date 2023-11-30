@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right, #6441a5, #2a0845);
+            color: #fff;
+        }
+
+        #board {
+            display: flex;
+            flex-wrap: wrap;
+            width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .cell {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            color: #333;
+            transition: background-color 0.3s ease;
+        }
+
+        .cell:hover {
+            background-color: #f9f9f9;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right, #6441a5, #2a0845);
+            color: #fff;
+            flex-direction: column;
+        }
+
+        #board {
+            display: flex;
+            flex-wrap: wrap;
+            width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .cell {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            color: #333;
+            transition: background-color 0.3s ease;
+        }
+
+        .cell:hover {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h2>Player: X</h2>
+        <h2>Bot: O</h2>
+    </div>
+    <div id="board">
+        <div class="row">
+            <div class="cell" onclick="makeMove(0)"></div>
+            <div class="cell" onclick="makeMove(1)"></div>
+            <div class="cell" onclick="makeMove(2)"></div>
+        </div>
+        <div class="row">
+            <div class="cell" onclick="makeMove(3)"></div>
+            <div class="cell" onclick="makeMove(4)"></div>
+            <div class="cell" onclick="makeMove(5)"></div>
+        </div>
+        <div class="row">
+            <div class="cell" onclick="makeMove(6)"></div>
+            <div class="cell" onclick="makeMove(7)"></div>
+            <div class="cell" onclick="makeMove(8)"></div>
+        </div>
+    </div>
+    <script>
+        let board = Array(9).fill(' ');
+        let user = 'X', computer = 'O';
+
+        function evaluate(board) {
+            // Check rows for victory
+            for (let i = 0; i < 9; i += 3) {
+                if (board[i] === board[i + 1] && board[i + 1] === board[i + 2] && board[i] !== ' ') {
+                    return board[i] === 'X' ? -10 : 10;
+                }
+            }
+
+            // Check columns for victory
+            for (let i = 0; i < 3; i++) {
+                if (board[i] === board[i + 3] && board[i + 3] === board[i + 6] && board[i] !== ' ') {
+                    return board[i] === 'X' ? -10 : 10;
+                }
+            }
+
+            // Check diagonals for victory
+            if (board[0] === board[4] && board[4] === board[8] && board[0] !== ' ' ||
+                board[2] === board[4] && board[4] === board[6] && board[2] !== ' ') {
+                return board[4] === 'X' ? -10 : 10;
+            }
+
+            // No one has won
+            return 0;
+        }
+
+        function minimax(board, depth, isMaximizing) {
+            let score = evaluate(board);
+
+            if (score === 10)
+                return score - depth;
+
+            if (score === -10)
+                return score + depth;
+
+            if (board.every(cell => cell !== ' '))
+                return 0;
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === ' ') {
+                        board[i] = computer;
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = ' ';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === ' ') {
+                        board[i] = user;
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = ' ';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function makeMove(index) {
+            // Make user move
+            board[index] = user;
+        
+            // Make computer move
+            setTimeout(() => {
+                computerMove();
+            }, 2000);
+            let bestScore = -Infinity;
+            let move;
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === ' ') {
+                    board[i] = computer;
+                    let score = minimax(board, 0, false);
+                    board[i] = ' ';
+                    if (score > bestScore) {
+                        bestScore = score;
+                        move = i;
+                    }
+                }
+            }
+        
+            if (move !== undefined) {
+                board[move] = computer;
+            }
+        
+            // Update the display
+            for (let i = 0; i < 9; i++) {
+                document.getElementsByClassName('cell')[i].textContent = board[i];
+            }
+        
+            // Check for a draw
+            if (board.every(cell => cell !== ' ')) {
+                alert('Draw!');
+                location.reload();
+                return;
+            }
+        
+            // Check for a loss
+            if (evaluate(board) === 10) {
+                // If user lost, redirect to the URL
+                window.location.href = "https://www.youtube.com/watch?v=OE3hF9fMp94&ab_channel=titty";
+            }
+        }
+
+    </script>
+</body>
+</html>
